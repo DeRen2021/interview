@@ -8,7 +8,6 @@ const QuestionCollection: React.FC = () => {
     const { type } = useParams<{ type: string }>();
     const navigate = useNavigate();
     const {
-        questionTypes,
         loadQuestionsByType,
         getQuestionsForType,
         isTypeLoading,
@@ -31,9 +30,9 @@ const QuestionCollection: React.FC = () => {
         }
     }, [questionType, loadQuestionsByType]);
 
-    const handleQuestionTypeChange = (newType: string) => {
-        navigate(`/questions/${newType}`);
-    };
+    // const handleQuestionTypeChange = (newType: string) => {
+    //     navigate(`/questions/${newType}`);
+    // };
 
     const handleBackToHome = () => {
         navigate('/');

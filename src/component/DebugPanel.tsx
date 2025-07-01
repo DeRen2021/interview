@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuestion } from '../context/QuestionContext';
-import { useLogin } from '../context/LoginContext';
 import '../styles/component/DebugPanel.css';
 
 const DebugPanel: React.FC = () => {

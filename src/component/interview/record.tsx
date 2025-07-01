@@ -1,4 +1,4 @@
-import React from 'react';
+// import React from 'react';
 import { ReactMediaRecorder } from 'react-media-recorder';
 import { transcribeEndpoint } from '../../config/config';
 
@@ -10,7 +10,7 @@ export default function AudioRecorder({ onTranscription }: AudioRecorderProps) {
   return (
     <ReactMediaRecorder
       audio
-      onStop={async (blobUrl, blob) => {
+      onStop={async (_, blob) => {
         // 将 Blob 上传给后端
         const form = new FormData();
         form.append('audio', blob, 'recording.webm');

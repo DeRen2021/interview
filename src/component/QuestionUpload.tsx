@@ -139,7 +139,7 @@ const QuestionUpload: React.FC = () => {
                 <header className="upload-header">
                     <h1 className="upload-title">问题上传管理</h1>
                     <div className="step-indicator">
-                        {steps.map((stepInfo, index) => (
+                        {steps.map((stepInfo) => (
                             <div
                                 key={stepInfo.step}
                                 className={`step ${currentStep >= stepInfo.step ? 'active' : ''} ${currentStep === stepInfo.step ? 'current' : ''}`}
