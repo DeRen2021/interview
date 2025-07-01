@@ -1,0 +1,383 @@
+.question-interview {
+  display: flex;
+  width: 100vw;
+  margin: 0 auto;
+  /* padding: 20px; */
+  gap: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.question-interview__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.question-interview__sidebar {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.question-interview__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.question-interview__title-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.question-interview__title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.like-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: white;
+  border: 2px solid #e1e5e9;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.like-button:hover:not(:disabled) {
+  border-color: #ff6b6b;
+  background: #fff5f5;
+  color: #ff6b6b;
+}
+
+.like-button.liked {
+  border-color: #ff6b6b;
+  background: #ff6b6b;
+  color: white;
+}
+
+.like-button.liked:hover:not(:disabled) {
+  background: #ff5252;
+  border-color: #ff5252;
+}
+
+.like-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.like-button__text {
+  font-size: 12px;
+}
+
+.mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mode-toggle__label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.mode-toggle__switch {
+  position: relative;
+  width: 60px;
+  height: 30px;
+  background: #ddd;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.mode-toggle__switch.active {
+  background: #4CAF50;
+}
+
+.mode-toggle__slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 26px;
+  height: 26px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.mode-toggle__switch.active .mode-toggle__slider {
+  transform: translateX(30px);
+}
+
+.loading-state, .error-state {
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 16px;
+}
+
+.loading-state {
+  color: #666;
+}
+
+.error-state {
+  color: #e74c3c;
+}
+
+.question-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.question-section {
+  padding: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.question-section:last-child {
+  border-bottom: none;
+}
+
+.question-section__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.question-section__content {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #555;
+}
+
+.collapsible-section {
+  border-top: 1px solid #f0f0f0;
+}
+
+.collapsible-section__header {
+  padding: 20px 24px;
+  background: #fafafa;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.collapsible-section__header:hover {
+  background: #f0f0f0;
+}
+
+.collapsible-section__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.collapsible-section__icon {
+  font-size: 12px;
+  color: #666;
+  transition: transform 0.3s ease;
+}
+
+.collapsible-section__icon.expanded {
+  transform: rotate(180deg);
+}
+
+.collapsible-section__content {
+  padding: 20px 24px;
+  background: white;
+}
+
+.collapsible-section__content.hidden {
+  display: none;
+}
+
+.audio-player {
+  margin-top: 20px;
+}
+
+.audio-player__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.audio-player__controls {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.audio-player__controls audio {
+  width: 100%;
+  height: 40px;
+}
+
+.mode-indicator {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #4CAF50;
+  color: white;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.mode-indicator.practice-mode {
+  background: #2196F3;
+}
+
+/* 侧边栏样式 */
+.sidebar {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.sidebar__header {
+  padding: 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.sidebar__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.sidebar__subtitle {
+  font-size: 12px;
+  color: #666;
+  margin: 4px 0 0 0;
+}
+
+.sidebar__list {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.sidebar__item {
+  display: block;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  text-decoration: none;
+  color: #555;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.sidebar__item:hover {
+  background: #f8f9fa;
+  color: #333;
+}
+
+.sidebar__item.active {
+  background: #e3f2fd;
+  color: #1976d2;
+  border-left: 3px solid #1976d2;
+}
+
+.sidebar__item:last-child {
+  border-bottom: none;
+}
+
+.sidebar__item-title {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sidebar__item-index {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.sidebar__loading {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.sidebar__empty {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .question-interview {
+    flex-direction: column;
+    padding: 16px;
+  }
+  
+  .question-interview__sidebar {
+    width: 100%;
+    order: -1;
+    margin-bottom: 16px;
+  }
+  
+  .sidebar {
+    position: static;
+  }
+  
+  .sidebar__list {
+    max-height: 200px;
+  }
+  
+  .question-interview__header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .question-interview__title {
+    font-size: 24px;
+  }
+  
+  .question-section {
+    padding: 20px;
+  }
+  
+  .collapsible-section__header {
+    padding: 16px 20px;
+  }
+  
+  .collapsible-section__content {
+    padding: 16px 20px;
+  }
+} 

@@ -1,0 +1,42 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useLogin } from '../context/LoginContext';
+import '../styles/component/Header.css';
+
+const Header: React.FC = () => {
+    const { user, logout } = useLogin();
+
+    const handleLogout = () => {
+        if (window.confirm('确定要退出登录吗？')) {
+            logout();
+        }
+    };
+
+    return (
+        <header className="app-header">
+            <div className="header-content">
+                <div className="header-left">
+                    <Link to="/" className="app-title-link">
+                        <h1 className="app-title">题库系统</h1>
+                    </Link>
+                </div>
+                
+                <div className="header-right">
+                    <nav className="header-nav">
+                        <Link to="/" className="nav-link">首页</Link>
+                        <Link to="/upload" className="nav-link">上传问题</Link>
+                        <Link to="/profile" className="nav-link">个人资料</Link>
+                    </nav>
+                    <div className="user-info">
+                        <span className="welcome-text">欢迎，{user?.username}</span>
+                        <button onClick={handleLogout} className="logout-button">
+                            退出登录
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+    );
+};
+
+export default Header; 
