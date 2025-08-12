@@ -1,22 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLogin } from '../context/LoginContext';
-import { type ObjectId } from '../type/common';
 import '../styles/component/UserProfile.css';
+import { type QuestionType } from '../type/question.type';
+import { getUserLikedQuestionsEndpoint, mainApi } from '../config/config';
+import { handleApiError } from '../config/apiInstance';
 
 const UserProfile: React.FC = () => {
+    const navigate = useNavigate();
     const { 
         user, 
-        updateUsername, 
-        updateLikedTopics, 
-        updateLikedQuestions,
-        isTopicLiked,
-        isQuestionLiked 
+        updateUsername
     } = useLogin();
     
     const [newUsername, setNewUsername] = useState<string>('');
     const [isUpdating, setIsUpdating] = useState<boolean>(false);
     const [message, setMessage] = useState<string>('');
+    const [likedQuestions, setLikedQuestions] = useState<QuestionType[]>([]);
 
+    useEffect(() => {
+        // 当用户信息可用时，自动获取喜欢的问题列表
+        if (user) {
+            getLikedQuestions();
+        }
+    }, [user]); // 依赖于user，当user对象变化时会重新执行
+
+    
     // 更新用户名
     const handleUpdateUsername = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,44 +50,45 @@ const UserProfile: React.FC = () => {
     };
 
     // 切换喜欢的主题
-    const handleToggleTopic = async (topicId: ObjectId) => {
+    
+
+    const getLikedQuestions = async () => {
+        if (!user || !user._id) {
+            setMessage('用户未登录或用户信息不完整');
+            return;
+        }
+
         setIsUpdating(true);
         setMessage('');
-        
         try {
-            const add = !isTopicLiked(topicId);
-            const success = await updateLikedTopics(add, topicId);
+            // 将用户ID作为查询参数附加到URL
+            const url = `${getUserLikedQuestionsEndpoint}?userId=${user._id}`;
+            // 使用配置好的mainApi实例，这样会经过拦截器和错误处理
+            const response = await mainApi.get<{ success: boolean, data: QuestionType[] }>(url);
             
-            if (success) {
-                setMessage(`主题${add ? '添加' : '移除'}成功！`);
+            // 检查响应是否成功，并且 data 字段是一个数组
+            if (response.data.success && Array.isArray(response.data.data)) {
+                // 问题列表在 response.data.data 中
+                setLikedQuestions(response.data.data);
+                // 自动加载，无需显示成功消息
+                // setMessage('成功获取喜欢的题目列表！');
             } else {
-                setMessage('操作失败，请重试');
+                setMessage('未能获取喜欢的题目列表');
+                setLikedQuestions([]);
             }
         } catch (error) {
-            setMessage('操作过程中出现错误');
+            const errorMessage = handleApiError(error);
+            setMessage(errorMessage);
+            setLikedQuestions([]);
+            console.error('获取喜欢的题目列表时出错:', error);
         } finally {
             setIsUpdating(false);
         }
     };
 
-    // 切换喜欢的问题
-    const handleToggleQuestion = async (questionId: ObjectId) => {
-        setIsUpdating(true);
-        setMessage('');
-        
-        try {
-            const add = !isQuestionLiked(questionId);
-            const success = await updateLikedQuestions(add, questionId);
-            
-            if (success) {
-                setMessage(`问题${add ? '添加' : '移除'}成功！`);
-            } else {
-                setMessage('操作失败，请重试');
-            }
-        } catch (error) {
-            setMessage('操作过程中出现错误');
-        } finally {
-            setIsUpdating(false);
+    const handleQuestionClick = (question: QuestionType) => {
+        if (question.topic && question._id) {
+            navigate(`/questions/${question.topic}/${question._id}`);
         }
     };
 
@@ -120,45 +130,30 @@ const UserProfile: React.FC = () => {
                 </form>
             </div>
 
-            {/* 演示主题操作按钮 */}
-            <div className="update-section">
-                <h3>主题操作示例</h3>
-                <div className="action-buttons">
-                    <button 
-                        onClick={() => handleToggleTopic('example_topic_1')}
-                        disabled={isUpdating}
-                        className={`action-button ${isTopicLiked('example_topic_1') ? 'liked' : ''}`}
-                    >
-                        {isTopicLiked('example_topic_1') ? '取消喜欢' : '喜欢'} 示例主题1
-                    </button>
-                    <button 
-                        onClick={() => handleToggleTopic('example_topic_2')}
-                        disabled={isUpdating}
-                        className={`action-button ${isTopicLiked('example_topic_2') ? 'liked' : ''}`}
-                    >
-                        {isTopicLiked('example_topic_2') ? '取消喜欢' : '喜欢'} 示例主题2
-                    </button>
-                </div>
-            </div>
+            
 
-            {/* 演示问题操作按钮 */}
+            
+
+            {/* 获取喜欢的问题 */}
             <div className="update-section">
-                <h3>问题操作示例</h3>
-                <div className="action-buttons">
-                    <button 
-                        onClick={() => handleToggleQuestion('example_question_1')}
-                        disabled={isUpdating}
-                        className={`action-button ${isQuestionLiked('example_question_1') ? 'liked' : ''}`}
-                    >
-                        {isQuestionLiked('example_question_1') ? '取消喜欢' : '喜欢'} 示例问题1
-                    </button>
-                    <button 
-                        onClick={() => handleToggleQuestion('example_question_2')}
-                        disabled={isUpdating}
-                        className={`action-button ${isQuestionLiked('example_question_2') ? 'liked' : ''}`}
-                    >
-                        {isQuestionLiked('example_question_2') ? '取消喜欢' : '喜欢'} 示例问题2
-                    </button>
+                <h3>我喜欢的题目</h3>
+                {isUpdating && <p>加载中...</p>}
+                <div className="liked-questions-list">
+                    {likedQuestions.length > 0 ? (
+                        <ul>
+                            {likedQuestions.map(q => (
+                                <li 
+                                    key={q._id} 
+                                    onClick={() => handleQuestionClick(q)}
+                                    className="liked-question-item"
+                                >
+                                    {q.question}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        !isUpdating && <p>还没有喜欢的题目。</p>
+                    )}
                 </div>
             </div>
 

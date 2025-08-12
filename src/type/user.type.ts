@@ -8,4 +8,6 @@ export interface UserDocument{
     password: string;
     likedTopics: ObjectId[];
     likedQuestions: ObjectId[];
+    role?: string;
+    token?: string; // JWT token
 }

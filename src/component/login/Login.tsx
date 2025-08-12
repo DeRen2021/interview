@@ -5,36 +5,71 @@ import '../../styles/component/Login.css';
 const Login: React.FC = () => {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [error, setError] = useState<string>('');
-    const { login, isLoading } = useLogin();
+    const [localError, setLocalError] = useState<string>('');
+    const [showLocalError, setShowLocalError] = useState<boolean>(false);
+    const { login, isLoading, getCurrentUserProfile, loginError, clearLoginError } = useLogin();
     
+
+    // 显示本地错误信息的辅助函数（用于表单验证等）
+    const displayLocalError = (errorMessage: string) => {
+        setLocalError(errorMessage);
+        setShowLocalError(true);
+        // 5秒后自动隐藏错误信息
+        setTimeout(() => {
+            setShowLocalError(false);
+        }, 5000);
+    };
+
+    // 清除所有错误的辅助函数
+    const clearAllErrors = () => {
+        setLocalError('');
+        setShowLocalError(false);
+        clearLoginError();
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
+        clearAllErrors();
 
         if (!email.trim()) {
-            setError('请输入邮箱');
+            displayLocalError('请输入邮箱地址');
             return;
         }
 
         // 简单的邮箱格式验证
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            setError('请输入有效的邮箱地址');
+            displayLocalError('请输入有效的邮箱地址格式');
             return;
         }
 
         if (!password.trim()) {
-            setError('请输入密码');
+            displayLocalError('请输入密码');
             return;
         }
 
+        if (password.length < 6) {
+            displayLocalError('密码长度至少需要6位字符');
+            return;
+        }
 
-        const success = await login(email, password);
-        
-        if (!success) {
-            setError('登录失败，请检查邮箱和密码');
+        try{
+            const result = await login(email, password);     
+            if (!result.success) {
+                // 错误信息已经在LoginContext中设置，这里不需要再处理
+                return;
+            }
+            
+            // 登录成功后获取用户资料
+            try {
+                await getCurrentUserProfile();
+            } catch (profileError) {
+                console.error('获取用户资料失败:', profileError);
+                // 即使获取用户资料失败，也不显示错误，因为登录已经成功
+            }
+        }catch(error){
+            console.error('登录过程中出现错误:', error);
+            displayLocalError('登录过程中出现网络错误，请检查网络连接后重试');
         }
     };
 
@@ -52,6 +87,7 @@ const Login: React.FC = () => {
                             id="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            onFocus={() => clearAllErrors()}
                             placeholder="请输入邮箱地址"
                             disabled={isLoading}
                         />
@@ -64,12 +100,25 @@ const Login: React.FC = () => {
                             id="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            onFocus={() => clearAllErrors()}
                             placeholder="请输入密码（至少6位）"
                             disabled={isLoading}
                         />
                     </div>
 
-                    {error && <div className="error-message">{error}</div>}
+                    {/* 显示LoginContext中的登录错误（如401等） */}
+                    {loginError && (
+                        <div className="error-message">
+                            {loginError}
+                        </div>
+                    )}
+                    
+                    {/* 显示本地表单验证错误 */}
+                    {localError && showLocalError && (
+                        <div className="error-message">
+                            {localError}
+                        </div>
+                    )}
 
                     <button 
                         type="submit" 
@@ -78,6 +127,8 @@ const Login: React.FC = () => {
                     >
                         {isLoading ? '登录中...' : '登录'}
                     </button>
+
+
                 </form>
 
                 

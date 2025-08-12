@@ -224,6 +224,58 @@
     color: #495057;
 }
 
+.answer-status {
+    background: #d4edda;
+    color: #155724;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid #c3e6cb;
+}
+
+.qa-content {
+    margin-top: 0.5rem;
+}
+
+.question-section,
+.answer-section {
+    margin-bottom: 1rem;
+}
+
+.question-section:last-child,
+.answer-section:last-child {
+    margin-bottom: 0;
+}
+
+.question-section label,
+.answer-section label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+.answer-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 100px;
+    background: #f8f9fa;
+}
+
+.answer-textarea:focus {
+    outline: none;
+    border-color: #28a745;
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1);
+    background: white;
+}
+
 .question-textarea {
     width: 100%;
     padding: 0.75rem;
@@ -365,6 +417,190 @@
     }
 }
 
+/* 进度条样式 */
+.progress-container {
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 0.9rem;
+    color: #4a5568;
+    font-weight: 600;
+}
+
+/* 加载动画 */
+.loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 改进的按钮样式 */
+.btn-outline {
+    background: transparent;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-outline:hover:not(:disabled) {
+    background: #667eea;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* 选择框样式 */
+.form-input select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 40px;
+}
+
+/* 改进的步骤指示器 */
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 2rem;
+    position: relative;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    min-width: 80px;
+}
+
+.step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: calc(100% + 10px);
+    width: calc(2rem - 20px);
+    height: 2px;
+    background: #e2e8f0;
+    z-index: 1;
+}
+
+.step.active:not(:last-child)::after {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+/* 改进的文件上传区域 */
+.file-upload-area {
+    border: 2px dashed #cbd5e0;
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.file-upload-area:hover {
+    border-color: #667eea;
+    background: #f7fafc;
+}
+
+.file-upload-area.dragover {
+    border-color: #667eea;
+    background: #ebf4ff;
+    transform: scale(1.02);
+}
+
+/* 改进的摘要卡片 */
+.summary {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.summary h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #2d3748;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.summary p {
+    margin: 0.5rem 0;
+    color: #4a5568;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.summary p strong {
+    color: #2d3748;
+}
+
+/* 动画效果 */
+.step-content {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 消息改进 */
+.message {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @media (max-width: 480px) {
     .upload-container {
         padding: 1rem;
@@ -372,5 +608,13 @@
     
     .step-content {
         padding: 1rem;
+    }
+    
+    .step-indicator {
+        gap: 1rem;
+    }
+    
+    .step:not(:last-child)::after {
+        width: calc(1rem - 20px);
     }
 } 

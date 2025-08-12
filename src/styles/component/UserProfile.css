@@ -157,6 +157,34 @@
     border: 1px solid #f5c6cb;
 }
 
+.liked-questions-list {
+    margin-top: 15px;
+}
+
+.liked-questions-list ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.liked-question-item {
+    background-color: #fff;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border: 1px solid #e1e5e9;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.liked-question-item:hover {
+    border-color: #667eea;
+    background-color: #f8f9ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
 @media (max-width: 768px) {
     .user-profile {
         margin: 10px;

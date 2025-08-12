@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { type QuestionType } from '../../type/question.type';
-import { baseUrl } from '../../config/config';
+import { baseUrl,updateQuestionFaqEndpoint, mainApi} from '../../config/config';
 import { useQuestion } from '../../context/QuestionContext';
 import { useLogin } from '../../context/LoginContext';
 import '../../styles/component/QuestionInterview.css';
-import AudioRecorder from './record';
+import AudioRecorder from './recordButton';
 import { type audioResponse } from '../../type/openai.type';
-import { checkAnswerEndpoint } from '../../config/config';
-import  axios from 'axios';
+import { handleApiError } from '../../config/apiInstance';
+import '../../styles/component/Button.css';
+import CheckAnswerButton from './checkAnswerButton';
+
 
 const QuestionInterview: React.FC = () => {
-    const { type, _id } = useParams<{ type: string, _id: string }>();
+    const { topic, _id } = useParams<{ topic: string, _id: string }>();
     const navigate = useNavigate();
-    const { getQuestionById, loadQuestionsByType, isTypeLoading, getQuestionsForType } = useQuestion();
+    const { getQuestionById, loadQuestionsByTopic: loadQuestionsByType, isTypeLoading, getQuestionsForTopic: getQuestionsForType } = useQuestion();
     const { updateLikedQuestions, isQuestionLiked } = useLogin();
     const [transcript, setTranscript] = useState<string>('');
     const [passed, setPassed] = useState<boolean|null>(null);
@@ -28,26 +30,27 @@ const QuestionInterview: React.FC = () => {
     const [isUpdatingLike, setIsUpdatingLike] = useState(false);
 
     // 类型检查：确保 type 和 _id 都存在
-    const question = type && _id ? getQuestionById(type, _id) : null;
-    const loading = type ? isTypeLoading(type) : false;
-    const questionList = type ? getQuestionsForType(type) : [];
+    const question = topic && _id ? getQuestionById(topic, _id) : null;
+    const loading = topic ? isTypeLoading(topic) : false;
+    const questionList = topic ? getQuestionsForType(topic) : [];
 
     useEffect(() => {
         // 如果参数不存在，重定向到首页
-        if (!type || !_id) {
+        if (!topic || !_id) {
+            console.log('topic or _id is not found',topic, _id);
             navigate('/');
             return;
         }
 
         // 如果问题数据还没有加载，则加载该类型的所有问题
         if (!question && !loading) {
-            loadQuestionsByType(type);
+            loadQuestionsByType(topic);
 
         }
         setTranscript('');
         setPassed(null);
         setFeedback('');
-    }, [type, _id, question, loading, navigate, loadQuestionsByType]);
+    }, [topic, _id, question, loading, navigate, loadQuestionsByType]);
 
     // 处理模式切换
     const handleModeToggle = () => {
@@ -91,8 +94,8 @@ const QuestionInterview: React.FC = () => {
 
     // 处理题目跳转
     const handleQuestionNavigation = (questionItem: QuestionType) => {
-        if (questionItem._id && type) {
-            navigate(`/questions/${type}/${questionItem._id}`);
+        if (questionItem._id && topic) {
+            navigate(`/questions/${topic}/${questionItem._id}`);
         }
     };
 
@@ -111,24 +114,34 @@ const QuestionInterview: React.FC = () => {
         }
     };
 
-    //检查答案是否正确
-    const handleCheckAnswer = async (answer:string,question:string) => {
-        try{
-            const response = await axios.post(checkAnswerEndpoint, {
-                question:question,answer:answer
+    const handleToggleFaq = async () => {
+        if (!question?._id) return;
+        try {
+            // 如果FAQ字段未定义，默认为false
+            const currentFaqStatus = question.faq || false;
+            
+            const response = await mainApi.patch(`${updateQuestionFaqEndpoint}/${question._id}/faq`, {
+                faq: !currentFaqStatus
             });
-            if(response.status === 200){  
-                const data: audioResponse = response.data;
-                console.log(data);
-                setPassed(data.passed);
-                setFeedback(data.feedback);
+            
+            if(response.status === 200) {
+                console.log('FAQ状态更新成功');
+                // 这里可以添加成功后的处理逻辑，比如更新本地状态
             }
-        }catch(error){
-            console.error('检查答案失败:', error);
-            setPassed(false);
-            setFeedback('检查答案失败');
-        } 
+        } catch (error) {
+            console.error('更新FAQ状态失败:', error);
+            const errorMessage = handleApiError(error);
+            console.error('FAQ更新错误详情:', errorMessage);
+        }
     }
+
+    //检查答案是否正确
+    const handleCheckResult = (passed: boolean, feedback: string) => {
+        setPassed(passed);
+        setFeedback(feedback);
+    }
+
+    
 
     if (loading) {
         return (
@@ -159,7 +172,7 @@ const QuestionInterview: React.FC = () => {
             <div className="question-interview__sidebar">
                 <div className="sidebar">
                     <div className="sidebar__header">
-                        <h3 className="sidebar__title">{type?.toUpperCase()} 题库</h3>
+                        <h3 className="sidebar__title">{topic?.toUpperCase()} 题库</h3>
                         <p className="sidebar__subtitle">共 {questionList.length} 道题</p>
                     </div>
                     <div className="sidebar__list">
@@ -189,17 +202,26 @@ const QuestionInterview: React.FC = () => {
                     <div className="question-interview__title-section">
                         <h1 className="question-interview__title">面试题目</h1>
                         {question?._id && (
-                            <button
-                                onClick={handleToggleLike}
-                                disabled={isUpdatingLike}
-                                className={`like-button ${isQuestionLiked(question._id) ? 'liked' : ''}`}
-                                title={isQuestionLiked(question._id) ? '取消喜欢' : '喜欢此问题'}
-                            >
-                                {isUpdatingLike ? '...' : (isQuestionLiked(question._id) ? '❤️' : '🤍')}
-                                <span className="like-button__text">
-                                    {isQuestionLiked(question._id) ? '已喜欢' : '喜欢'}
-                                </span>
-                            </button>
+                            <>
+                                <button
+                                    onClick={handleToggleLike}
+                                    disabled={isUpdatingLike}
+                                    className={`like-button ${isQuestionLiked(question._id) ? 'liked' : ''}`}
+                                    title={isQuestionLiked(question._id) ? '取消喜欢' : '喜欢此问题'}
+                                >
+                                    {isUpdatingLike ? '...' : (isQuestionLiked(question._id) ? '❤️' : '🤍')}
+                                    <span className="like-button__text">
+                                        {isQuestionLiked(question._id) ? '已喜欢' : '喜欢'}
+                                    </span>
+                                </button>
+                                <button
+                                    onClick={handleToggleFaq}
+                                    className={`faq-button ${question.faq || false ? 'active' : ''}`}
+                                    title={(question.faq || false) ? '取消高频题标记' : '标记为高频题'}
+                                >
+                                    🔥 {(question.faq || false) ? '高频题' : '标记高频'}
+                                </button>
+                            </>
                         )}
                     </div>
                     <div className="mode-toggle">
@@ -218,7 +240,24 @@ const QuestionInterview: React.FC = () => {
                 <div className="question-content">
                     {/* 问题部分 */}
                     <div className="question-section">
-                        <h2 className="question-section__title">题目</h2>
+                        <div className="question-section-header">
+                            <h2 className="question-section__title">题目</h2>
+                            <div className="question-meta">
+                                {(question.faq || false) && (
+                                    <span className="meta-badge faq-badge">🔥 高频题</span>
+                                )}
+                                {question.accuracy && question.accuracy.totalAttempts > 0 && (
+                                    <div className="meta-accuracy">
+                                        <span className="meta-badge accuracy-badge">
+                                            正确率: {((question.accuracy.correctAttempts / question.accuracy.totalAttempts) * 100).toFixed(0)}%
+                                        </span>
+                                        <span className="accuracy-details">
+                                            ({question.accuracy.correctAttempts} / {question.accuracy.totalAttempts})
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                         <div className="question-section__content">
                             {question.question}
                         </div>
@@ -281,7 +320,7 @@ const QuestionInterview: React.FC = () => {
 
                             {/* 把回调以 prop 形式传给子组件 */}
                             <AudioRecorder onTranscription={setTranscript} />
-                            <button onClick={() => handleCheckAnswer(transcript,question.question)}>检查答案</button>
+                            <CheckAnswerButton question={question} answer={transcript} onResult={handleCheckResult} />
                             <p>{passed ? '答案正确' : passed === false ? '答案错误' : ''}</p>
                             <p>{feedback}</p>
                             </div>

@@ -4,12 +4,15 @@ import { useQuestion } from '../context/QuestionContext';
 import { useLogin } from '../context/LoginContext';
 import '../styles/component/QuestionCollection.css';
 
+// 筛选选项类型
+type FilterOption = 'all' | 'liked' | 'faq';
+
 const QuestionCollection: React.FC = () => {
-    const { type } = useParams<{ type: string }>();
+    const { topic } = useParams<{ topic: string }>();
     const navigate = useNavigate();
     const {
-        loadQuestionsByType,
-        getQuestionsForType,
+        loadQuestionsByTopic,
+        getQuestionsForTopic,
         isTypeLoading,
         getTypeError,
         clearTypeError
@@ -18,17 +21,56 @@ const QuestionCollection: React.FC = () => {
     
     // 处理喜欢问题的加载状态
     const [likingQuestions, setLikingQuestions] = useState<Record<string, boolean>>({});
+    // 添加筛选状态
+    const [currentFilter, setCurrentFilter] = useState<FilterOption>('all');
+    // 添加搜索状态
+    const [searchQuery, setSearchQuery] = useState<string>('');
 
-    const questionType = type || 'react';
-    const questions = getQuestionsForType(questionType);
-    const loading = isTypeLoading(questionType);
-    const error = getTypeError(questionType);
+    const topicName = topic;
+
+    // not found page
+    if (!topicName) {
+        navigate('/');
+        return;
+    }
+
+    const allQuestions = getQuestionsForTopic(topicName);
+    const loading = isTypeLoading(topicName);
+    const error = getTypeError(topicName);
+
+    // 根据筛选条件和搜索查询过滤问题
+    const filteredQuestions = allQuestions.filter(question => {
+        // 首先根据筛选条件过滤
+        let matchesFilter = true;
+        switch (currentFilter) {
+            case 'liked':
+                matchesFilter = isQuestionLiked(question._id || '');
+                break;
+            case 'faq':
+                matchesFilter = question.faq === true;
+                break;
+            default:
+                matchesFilter = true;
+        }
+        
+        // 然后根据搜索查询过滤
+        const matchesSearch = searchQuery.trim() === '' || 
+            question.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            question.topic.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (question.answer?.answer && question.answer.answer.toLowerCase().includes(searchQuery.toLowerCase()));
+        
+        return matchesFilter && matchesSearch;
+    });
+
+    // 计算统计信息
+    const likedCount = allQuestions.filter(q => isQuestionLiked(q._id || '')).length;
+    const faqCount = allQuestions.filter(q => q.faq === true).length;
 
     useEffect(() => {
-        if (questionType) {
-            loadQuestionsByType(questionType);
+        if (topicName) {
+            loadQuestionsByTopic(topicName);
         }
-    }, [questionType, loadQuestionsByType]);
+    }, [topicName]);
 
     // const handleQuestionTypeChange = (newType: string) => {
     //     navigate(`/questions/${newType}`);
@@ -39,8 +81,23 @@ const QuestionCollection: React.FC = () => {
     };
 
     const handleRetry = () => {
-        clearTypeError(questionType);
-        loadQuestionsByType(questionType);
+        clearTypeError(topicName);
+        loadQuestionsByTopic(topicName);
+    };
+
+    // 处理筛选变化
+    const handleFilterChange = (filter: FilterOption) => {
+        setCurrentFilter(filter);
+    };
+
+    // 处理搜索输入变化
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(event.target.value);
+    };
+
+    // 清空搜索
+    const handleClearSearch = () => {
+        setSearchQuery('');
     };
 
     // 处理喜欢问题
@@ -94,46 +151,121 @@ const QuestionCollection: React.FC = () => {
                     ← 返回主页
                 </button>
                 <h1 className="collection-title">
-                    {questionType.toUpperCase()} 面试问题集合
+                    {topicName.toUpperCase()} 面试问题集合
                 </h1>
                 <div className="collection-stats">
-                    <span className="question-count">{questions.length} 个问题</span>
-                    <span className="collection-type">{questionType}</span>
+                    <span className="question-count">{filteredQuestions.length} 个问题</span>
+                    <span className="collection-type">{topicName}</span>
                 </div>
             </header>
 
-            {/* <nav className="type-selector">
-                <h3 className="selector-title">选择问题类型：</h3>
-                <div className="type-buttons">
-                    {questionTypes.map((questionTypeItem) => (
-                        <button
-                            key={questionTypeItem._id}
-                            className={`type-button ${questionType === questionTypeItem.type ? 'active' : ''}`}
-                            onClick={() => handleQuestionTypeChange(questionTypeItem.type)}
-                        >
-                            {questionTypeItem.type.toUpperCase()}
-                        </button>
-                    ))}
+            {/* 搜索栏 */}
+            <div className="search-section">
+                <h3 className="search-title">搜索问题：</h3>
+                <div className="search-bar">
+                    <div className="search-input-container">
+                        <span className="search-icon">🔍</span>
+                        <input
+                            type="text"
+                            className="search-input"
+                            placeholder="搜索问题内容、主题或答案..."
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                        />
+                        {searchQuery && (
+                            <button
+                                className="clear-search-button"
+                                onClick={handleClearSearch}
+                                title="清空搜索"
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+                    {searchQuery && (
+                        <div className="search-results-info">
+                            找到 {filteredQuestions.length} 个匹配的问题
+                        </div>
+                    )}
                 </div>
-            </nav> */}
+            </div>
+
+            {/* 筛选器 */}
+            <div className="filter-section">
+                <h3 className="filter-title">筛选问题：</h3>
+                <div className="filter-buttons">
+                    <button
+                        className={`filter-button ${currentFilter === 'all' ? 'active' : ''}`}
+                        onClick={() => handleFilterChange('all')}
+                    >
+                        <span className="filter-icon">📋</span>
+                        <span className="filter-text">全部题目</span>
+                        <span className="filter-count">({allQuestions.length})</span>
+                    </button>
+                    <button
+                        className={`filter-button ${currentFilter === 'liked' ? 'active' : ''}`}
+                        onClick={() => handleFilterChange('liked')}
+                    >
+                        <span className="filter-icon">❤️</span>
+                        <span className="filter-text">喜欢的题目</span>
+                        <span className="filter-count">({likedCount})</span>
+                    </button>
+                    <button
+                        className={`filter-button ${currentFilter === 'faq' ? 'active' : ''}`}
+                        onClick={() => handleFilterChange('faq')}
+                    >
+                        <span className="filter-icon">🔥</span>
+                        <span className="filter-text">高频题目</span>
+                        <span className="filter-count">({faqCount})</span>
+                    </button>
+                </div>
+            </div>
+
+
 
             <main className="questions-container">
-                {questions.length === 0 ? (
+                {filteredQuestions.length === 0 ? (
                     <div className="empty-state">
-                        <div className="empty-icon">📋</div>
-                        <h3 className="empty-title">暂无问题</h3>
-                        <p className="empty-message">该类型下还没有问题，请选择其他类型</p>
+                        <div className="empty-icon">
+                            {searchQuery ? '🔍' : '📋'}
+                        </div>
+                        <h3 className="empty-title">
+                            {searchQuery ? '没有找到匹配的问题' : 
+                             currentFilter === 'all' ? '暂无问题' : 
+                             currentFilter === 'liked' ? '暂无喜欢的问题' : 
+                             '暂无高频问题'}
+                        </h3>
+                        <p className="empty-message">
+                            {searchQuery ? `没有找到包含 "${searchQuery}" 的问题，请尝试其他关键词` :
+                             currentFilter === 'all' ? '该类型下还没有问题，请选择其他类型' : 
+                             currentFilter === 'liked' ? '还没有喜欢的问题，先去喜欢一些问题吧' : 
+                             '还没有标记为高频的问题'}
+                        </p>
+                        {searchQuery && (
+                            <button
+                                className="clear-search-button-empty"
+                                onClick={handleClearSearch}
+                            >
+                                清空搜索
+                            </button>
+                        )}
                     </div>
                 ) : (
                     <div className="questions-grid">
-                        {questions.map((question, index) => (
+                        {filteredQuestions.map((question, index) => (
+                            console.log('question', question.topic),
                             <article key={question._id} className="question-card">
                                 <header className="question-header">
                                     <span className="question-number">#{index + 1}</span>
-                                    <span className="question-type-badge">{question.type}</span>
+                                    <div className="question-badges">
+                                        <span className="question-type-badge">{question.topic}</span>
+                                        {question.faq && (
+                                            <span className="faq-badge">🔥 高频</span>
+                                        )}
+                                    </div>
                                 </header>
                                 
-                                <div className="question-content" onClick={() => navigate(`/questions/${question.type}/${question._id}`)}>
+                                <div className="question-content" onClick={() => navigate(`/questions/${question.topic}/${question._id}`)}>
                                     <h4 className="question-title">{question.question}</h4>
                                     
                                     {question.answer && (
@@ -180,9 +312,24 @@ const QuestionCollection: React.FC = () => {
             <footer className="collection-footer">
                 <div className="footer-info">
                     <p className="footer-text">
-                        共 {questions.length} 道 {questionType.toUpperCase()} 面试题
-                        {questions.length > 0 && (
-                            <span className="cached-indicator"> (已缓存)</span>
+                        {searchQuery ? (
+                            <>
+                                搜索 "{searchQuery}" 找到 {filteredQuestions.length} 道题目
+                                {currentFilter !== 'all' && (
+                                    <span className="filter-indicator">
+                                        {' '}({currentFilter === 'liked' ? '仅显示喜欢的' : '仅显示高频'}题目)
+                                    </span>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                {currentFilter === 'all' ? `共 ${allQuestions.length} 道` : 
+                                 currentFilter === 'liked' ? `共 ${likedCount} 道喜欢的` : 
+                                 `共 ${faqCount} 道高频`} {topicName.toUpperCase()} 面试题
+                                {filteredQuestions.length > 0 && (
+                                    <span className="cached-indicator"> (已缓存)</span>
+                                )}
+                            </>
                         )}
                     </p>
                     <p className="footer-subtitle">

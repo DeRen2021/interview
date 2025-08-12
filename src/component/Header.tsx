@@ -12,6 +12,8 @@ const Header: React.FC = () => {
         }
     };
 
+    // console.log('user', user);
+
     return (
         <header className="app-header">
             <div className="header-content">
@@ -24,8 +26,22 @@ const Header: React.FC = () => {
                 <div className="header-right">
                     <nav className="header-nav">
                         <Link to="/" className="nav-link">首页</Link>
-                        <Link to="/upload" className="nav-link">上传问题</Link>
                         <Link to="/profile" className="nav-link">个人资料</Link>
+                        
+                        <Link 
+                            to="/upload" 
+                            className={`nav-link ${user?.role !== 'admin' ? 'disabled' : ''}`}
+                            onClick={(e) => user?.role !== 'admin' && e.preventDefault()}
+                        >
+                            上传问题
+                        </Link>
+                        <Link 
+                            to="/admin" 
+                            className={`nav-link ${user?.role !== 'admin' ? 'disabled' : ''}`}
+                            onClick={(e) => user?.role !== 'admin' && e.preventDefault()}
+                        >
+                            管理问题
+                        </Link>
                     </nav>
                     <div className="user-info">
                         <span className="welcome-text">欢迎，{user?.username}</span>

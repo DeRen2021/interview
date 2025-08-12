@@ -1,27 +1,42 @@
-// 从环境变量读取配置，如果没有设置则使用默认值
-const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000/';
+// 导入基础配置
+import { baseUrl, questionManagementBaseUrl } from './baseConfig';
+// 导入API实例
+import { mainApi, questionManagementApi } from './apiInstance';
 
-// 新增：问题解析和上传的后端URL (端口6432)
-const questionManagementBaseUrl = import.meta.env.VITE_QUESTION_MANAGEMENT_BASE_URL || 'http://localhost:6432/';
+const getQuestionByTopicEndpoint = "api/questions/";
 
-const getQuestionByTypeEndpoint = "api/questions/";
+const getAllQuestionTypesEndpoint = "api/topic/";
 
-const getAllQuestionTypesEndpoint = "api/questionType/";
+
 
 // 新增：问题管理端点
-const parseQuestionEndpoint = `${questionManagementBaseUrl}api/parse-question`;
+const parseFrqQuestionEndpoint = `${questionManagementBaseUrl}api/parse-frq-question`;
+
 const uploadQuestionEndpoint = `${questionManagementBaseUrl}api/upload-question`;
+
+const generateAnswerEndpoint = `${questionManagementBaseUrl}api/generate-answer`;
+
+const generateExplanationEndpoint = `${questionManagementBaseUrl}api/generate-explanation`;
+
+const updateQuestionEndpoint = `${questionManagementBaseUrl}api/update-question`;
 
 // User Route
 const userEndoint = `${baseUrl}api/users`;
 
 const authUserEndpoint = `${userEndoint}/auth`;
 
+const getUserProfileEndpoint = `${userEndoint}/profile`;
+
 const updateUserNameEndpoint = `${userEndoint}/username`;
 
 const updateUserLikedTopicsEndpoint = `${userEndoint}/liked-topics`;
 
 const updateUserLikedQuestionsEndpoint = `${userEndoint}/liked-questions`;
+const getUserLikedQuestionsEndpoint = `${userEndoint}/liked-questions`;
+
+const updateQuestionFaqEndpoint = `${baseUrl}api/questions`;
+
+// const updateQuestionAccuracyEndpoint = `${baseUrl}api/questions/:questionId/accuracy`;
 
 
 
@@ -31,17 +46,35 @@ const transcribeEndpoint = `${baseUrl}api/openai/transcribe`;
 const checkAnswerEndpoint = `${baseUrl}api/openai/comparison`;
 
 
-export { baseUrl, 
+export { 
+    // API实例
+    mainApi,
+    questionManagementApi,
+    
+    // 基础URL
+    baseUrl, 
     questionManagementBaseUrl,
-    getQuestionByTypeEndpoint ,getAllQuestionTypesEndpoint,
-    parseQuestionEndpoint,
+    
+    // 端点配置
+    getQuestionByTopicEndpoint,
+    getAllQuestionTypesEndpoint,
+
+    // admin管理端点
+    parseFrqQuestionEndpoint,
     uploadQuestionEndpoint,
+    generateAnswerEndpoint,
+    generateExplanationEndpoint,
+    updateQuestionEndpoint,
+
+    // 用户端点
     userEndoint,
     authUserEndpoint,
     updateUserNameEndpoint,
     updateUserLikedTopicsEndpoint,
     updateUserLikedQuestionsEndpoint,
-
+    updateQuestionFaqEndpoint,
+    getUserLikedQuestionsEndpoint,
+    getUserProfileEndpoint,
     transcribeEndpoint,
     checkAnswerEndpoint
 };

@@ -1,17 +1,17 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuestion } from '../context/QuestionContext';
-import TypeCard from './TypeCard';
+import TypeCard from './TopicCard';
 import '../styles/component/HomePage.css';
 
 const HomePage: React.FC = () => {
-    const { questionTypes, typesLoading, typesError } = useQuestion();
+    const { questionTypes, topicsLoading: typesLoading, typesError } = useQuestion();
     const navigate = useNavigate();
 
     const handleTypeClick = (type: string) => {
         navigate(`/questions/${type}`);
     };
-    console.log(questionTypes);
+    // console.log(questionTypes);
 
     if (typesLoading) {
         return (
@@ -42,10 +42,10 @@ const HomePage: React.FC = () => {
                 <div className="types-grid">
                     {questionTypes.map((questionType) => (
                         <TypeCard
-                            key={questionType._id || questionType.type}
-                            type={questionType.type}
-                            topicId={questionType._id || questionType.type} // 使用_id或type作为topicId
-                            onClick={() => handleTypeClick(questionType.type)}
+                            key={questionType._id || questionType.topic}
+                            type={questionType.topic}
+                            topicId={questionType._id || questionType.topic} // 使用_id或type作为topicId
+                            onClick={() => handleTypeClick(questionType.topic)}
                         />
                     ))}
                 </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLogin } from '../context/LoginContext';
-import '../styles/component/TypeCard.css';
+import '../styles/component/TopicCard.css';
 
 interface TypeCardProps {
     type: string;
