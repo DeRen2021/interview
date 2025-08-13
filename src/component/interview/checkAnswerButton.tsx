@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { checkAnswerEndpoint, mainApi } from '../../config/config';
 import { type QuestionType } from '../../type/question.type';
 import '../../styles/component/Button.css';

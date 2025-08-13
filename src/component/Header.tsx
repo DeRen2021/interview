@@ -44,7 +44,7 @@ const Header: React.FC = () => {
                         </Link>
                     </nav>
                     <div className="user-info">
-                        <span className="welcome-text">欢迎，{user?.username}</span>
+                        <span className="welcome-text">欢迎，{user?.email}</span>
                         <button onClick={handleLogout} className="logout-button">
                             退出登录
                         </button>

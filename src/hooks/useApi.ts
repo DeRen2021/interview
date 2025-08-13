@@ -1,5 +1,5 @@
 import { mainApi, questionManagementApi } from '../config/config';
-import { handleApiError, type ApiResponse } from '../config/apiInstance';
+import { handleApiError } from '../config/apiInstance';
 import { useState } from 'react';
 
 // API请求状态接口
