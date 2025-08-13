@@ -3,7 +3,7 @@ import { type ObjectId } from './common';
 
 export interface UserDocument{
     _id?: ObjectId;
-    username: string;
+    // username: string;
     email: string;
     password: string;
     likedTopics: ObjectId[];

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { type UserDocument } from '../type/user.type';
 import { type ObjectId } from '../type/common';
-import { authUserEndpoint, updateUserNameEndpoint, getUserProfileEndpoint,
+import { authUserEndpoint, getUserProfileEndpoint,
     updateUserLikedTopicsEndpoint, updateUserLikedQuestionsEndpoint, mainApi } from '../config/config';
 import { TokenManager, handleApiError } from '../config/apiInstance';
 
@@ -22,8 +22,6 @@ interface LoginContextType {
     getCurrentUserProfile: () => Promise<void>;
     
     // 更新用户信息的方法
-    updateUsername: (newUsername: string) => Promise<boolean>;
-
     updateLikedTopics: (add:boolean,topicId: ObjectId, ) => Promise<boolean>;
 
     updateLikedQuestions: (add:boolean,questionId: ObjectId) => Promise<boolean>;
@@ -104,7 +102,8 @@ export const LoginProvider: React.FC<LoginProviderProps> = ({ children }) => {
                     TokenManager.setToken(userData.token);
                 }
                 
-                setUser(userData);
+                // setUser(userData);
+                setUser({...userData,_id:userData.userId})
                 localStorage.setItem('currentUser', JSON.stringify(userData));
                 console.log('规范化后的用户数据:', userData);
                 setLoginError(null); // 清除错误
@@ -153,28 +152,6 @@ export const LoginProvider: React.FC<LoginProviderProps> = ({ children }) => {
         }
     };
 
-    // 更新用户名
-    const updateUsername = async (newUsername: string): Promise<boolean> => {
-        if (!user) return false;
-        
-        try {
-            const response = await mainApi.put(updateUserNameEndpoint, { 
-                userId: user._id, 
-                username: newUsername 
-            });
-            
-            if (response.status === 200) {
-                const updatedUser = { ...user, username: newUsername };
-                setUser(updatedUser);
-                localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-                return true;
-            }
-            return false;
-        } catch (error) {
-            console.error('Update username error:', error);
-            return false;
-        }
-    };
 
     // 更新喜欢的主题
     const updateLikedTopics = async (add:boolean,topicId: ObjectId): Promise<boolean> => {
@@ -261,7 +238,6 @@ export const LoginProvider: React.FC<LoginProviderProps> = ({ children }) => {
         login,
         logout,
         getCurrentUser,
-        updateUsername,
         updateLikedTopics,
         updateLikedQuestions,
         isTopicLiked,

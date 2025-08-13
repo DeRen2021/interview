@@ -3,9 +3,19 @@ import { baseUrl, questionManagementBaseUrl } from './baseConfig';
 // 导入API实例
 import { mainApi, questionManagementApi } from './apiInstance';
 
+
+
+
+// Topic 端点
+const getAllQuestionTypesEndpoint = "api/topic/";
+
+const getPrivateTopicEndpoint = "api/topic/private";
+
+
+//问题端点
 const getQuestionByTopicEndpoint = "api/questions/";
 
-const getAllQuestionTypesEndpoint = "api/topic/";
+const getPrivateQuestionByTopicEndpoint = "api/questions/private/";
 
 
 
@@ -58,6 +68,8 @@ export {
     // 端点配置
     getQuestionByTopicEndpoint,
     getAllQuestionTypesEndpoint,
+    getPrivateTopicEndpoint,
+    getPrivateQuestionByTopicEndpoint,
 
     // admin管理端点
     parseFrqQuestionEndpoint,

@@ -27,6 +27,9 @@ const QuestionUpload: React.FC = () => {
     const [success, setSuccess] = useState('');
     // const [generatingAnswers, setGeneratingAnswers] = useState(false);
 
+    // 主题选项
+    const [topicType,setTopicType] = useState<"public"|"private">("public")
+
     const steps: UploadStep[] = [
         { step: 1, title: '上传文件' },
         { step: 2, title: '编辑问题' },
@@ -89,17 +92,21 @@ const QuestionUpload: React.FC = () => {
         setLoading(false);
     };
 
+    const hanldeManuallyUpload = () =>{
+        setCurrentStep(2);
+    }
+
     const handleQuestionChange = (index: number, value: string) => {
         const updatedQuestions = [...questionList];
         updatedQuestions[index] = { ...updatedQuestions[index], question: value };
         setQuestionList(updatedQuestions);
     };
 
-    // const handleAnswerChange = (index: number, value: string) => {
-    //     const updatedQuestions = [...questionList];
-    //     updatedQuestions[index] = { ...updatedQuestions[index], answer: value };
-    //     setQuestionList(updatedQuestions);
-    // };
+    const handleAnswerChange = (index: number, value: string) => {
+        const updatedQuestions = [...questionList];
+        updatedQuestions[index] = { ...updatedQuestions[index], answer: value };
+        setQuestionList(updatedQuestions);
+    };
 
     const handleRemoveQuestion = (index: number) => {
         const updatedQuestions = questionList.filter((_, i) => i !== index);
@@ -141,7 +148,8 @@ const QuestionUpload: React.FC = () => {
                 question_list: questionTexts,
                 answer_list: answerList,
                 topic: topic,
-                type: questionType
+                type: questionType,
+                topic_type:topicType
             });
 
             if (response.data) {
@@ -256,6 +264,13 @@ const QuestionUpload: React.FC = () => {
                                 </>
                             ) : '解析文件'}
                         </button>
+
+                        <button 
+                            onClick={hanldeManuallyUpload}
+                            className="btn btn-primary"
+                        >
+                            手动输入问题
+                        </button>
                     </div>
                 )}
 
@@ -291,17 +306,16 @@ const QuestionUpload: React.FC = () => {
                                                 rows={3}
                                             />
                                         </div>
-                                        {qaItem.answer && qaItem.answer.trim() && (
-                                            <div className="answer-section">
-                                                <label>预设答案</label>
-                                                <textarea
-                                                    value={qaItem.answer}
-                                                    placeholder="答案内容..."
-                                                    className="answer-textarea"
-                                                    rows={4}
-                                                />
-                                            </div>
-                                        )}
+                                        <div className="answer-section">
+                                            <label>预设答案</label>
+                                            <textarea
+                                                value={qaItem.answer}
+                                                onChange={(e) => handleAnswerChange(index, e.target.value)}
+                                                placeholder="输入答案内容（可选）..."
+                                                className="answer-textarea"
+                                                rows={4}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -336,10 +350,25 @@ const QuestionUpload: React.FC = () => {
 
                 
 
-                {/* 步骤4: 设置主题并上传 */}
+                {/* 步骤3: 设置主题并上传 */}
                 {currentStep === 3 && (
                     <div className="step-content">
-                        <h2>步骤 4: 设置主题并保存到数据库</h2>
+                        <h2>步骤 3: 设置主题并保存到数据库</h2>
+
+                        <div className="form-group">
+                            <label htmlFor="questionType">Topic类型</label>
+                            <select
+                                id="questionType"
+                                value={topicType}
+                                onChange={(e) => setTopicType(e.target.value as "public" | "private")}
+                                className="form-input"
+                            >
+                                <option value="public">Public(此题库所有人可以见) </option>
+                                <option value="private">Private(此题库仅你可见)</option>
+                            </select>
+                        </div>
+
+
                         <div className="form-group">
                             <label htmlFor="topic">主题 *</label>
                             <input
@@ -362,7 +391,7 @@ const QuestionUpload: React.FC = () => {
 
                         <div className="step-navigation">
                             <button
-                                onClick={() => setCurrentStep(3)}
+                                onClick={() => setCurrentStep(2)}
                                 className="btn btn-secondary"
                             >
                                 返回上一步

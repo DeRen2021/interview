@@ -10,50 +10,25 @@ const UserProfile: React.FC = () => {
     const navigate = useNavigate();
     const { 
         user, 
-        updateUsername
     } = useLogin();
     
-    const [newUsername, setNewUsername] = useState<string>('');
     const [isUpdating, setIsUpdating] = useState<boolean>(false);
     const [message, setMessage] = useState<string>('');
     const [likedQuestions, setLikedQuestions] = useState<QuestionType[]>([]);
 
     useEffect(() => {
         // 当用户信息可用时，自动获取喜欢的问题列表
+        // console.log(user)
         if (user) {
             getLikedQuestions();
         }
     }, [user]); // 依赖于user，当user对象变化时会重新执行
 
     
-    // 更新用户名
-    const handleUpdateUsername = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!newUsername.trim()) return;
-        
-        setIsUpdating(true);
-        setMessage('');
-        
-        try {
-            const success = await updateUsername(newUsername);
-            if (success) {
-                setMessage('用户名更新成功！');
-                setNewUsername('');
-            } else {
-                setMessage('更新失败，请重试');
-            }
-        } catch (error) {
-            setMessage('更新过程中出现错误');
-        } finally {
-            setIsUpdating(false);
-        }
-    };
-
-    // 切换喜欢的主题
     
 
     const getLikedQuestions = async () => {
-        if (!user || !user._id) {
+        if (!user || !user.email || !user.role) {
             setMessage('用户未登录或用户信息不完整');
             return;
         }
@@ -101,15 +76,15 @@ const UserProfile: React.FC = () => {
             <div className="profile-header">
                 <h2>用户资料</h2>
                 <div className="user-info">
-                    <p><strong>用户名:</strong> {user.username}</p>
                     <p><strong>邮箱:</strong> {user.email}</p>
+                    <p><strong>用户权限:</strong> {user.role}</p>
                     <p><strong>喜欢的主题数:</strong> {user.likedTopics.length}</p>
                     <p><strong>喜欢的问题数:</strong> {user.likedQuestions.length}</p>
                 </div>
             </div>
 
             {/* 更新用户名表单 */}
-            <div className="update-section">
+            {/* <div className="update-section">
                 <h3>更新用户名</h3>
                 <form onSubmit={handleUpdateUsername} className="update-form">
                     <input
@@ -128,7 +103,7 @@ const UserProfile: React.FC = () => {
                         {isUpdating ? '更新中...' : '更新用户名'}
                     </button>
                 </form>
-            </div>
+            </div> */}
 
             
 

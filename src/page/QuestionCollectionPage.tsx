@@ -10,12 +10,22 @@ type FilterOption = 'all' | 'liked' | 'faq';
 const QuestionCollection: React.FC = () => {
     const { topic } = useParams<{ topic: string }>();
     const navigate = useNavigate();
+    
+    // 检测是否为私有模式（通过URL路径判断）
+    const isPrivateMode = window.location.pathname.includes('/questions/private/');
+    
     const {
         loadQuestionsByTopic,
         getQuestionsForTopic,
         isTypeLoading,
         getTypeError,
-        clearTypeError
+        clearTypeError,
+        // 私有模式方法
+        loadPrivateQuestionsByTopic,
+        getPrivateQuestionsForTopic,
+        isPrivateTypeLoading,
+        getPrivateTypeError,
+        clearPrivateTypeError
     } = useQuestion();
     const { updateLikedQuestions, isQuestionLiked } = useLogin();
     
@@ -34,9 +44,16 @@ const QuestionCollection: React.FC = () => {
         return;
     }
 
-    const allQuestions = getQuestionsForTopic(topicName);
-    const loading = isTypeLoading(topicName);
-    const error = getTypeError(topicName);
+    // 根据模式获取相应数据
+    const allQuestions = isPrivateMode 
+        ? getPrivateQuestionsForTopic(topicName) 
+        : getQuestionsForTopic(topicName);
+    const loading = isPrivateMode 
+        ? isPrivateTypeLoading(topicName) 
+        : isTypeLoading(topicName);
+    const error = isPrivateMode 
+        ? getPrivateTypeError(topicName) 
+        : getTypeError(topicName);
 
     // 根据筛选条件和搜索查询过滤问题
     const filteredQuestions = allQuestions.filter(question => {
@@ -68,9 +85,13 @@ const QuestionCollection: React.FC = () => {
 
     useEffect(() => {
         if (topicName) {
-            loadQuestionsByTopic(topicName);
+            if (isPrivateMode) {
+                loadPrivateQuestionsByTopic(topicName);
+            } else {
+                loadQuestionsByTopic(topicName);
+            }
         }
-    }, [topicName]);
+    }, [topicName, isPrivateMode]);
 
     // const handleQuestionTypeChange = (newType: string) => {
     //     navigate(`/questions/${newType}`);
@@ -81,8 +102,13 @@ const QuestionCollection: React.FC = () => {
     };
 
     const handleRetry = () => {
-        clearTypeError(topicName);
-        loadQuestionsByTopic(topicName);
+        if (isPrivateMode) {
+            clearPrivateTypeError(topicName);
+            loadPrivateQuestionsByTopic(topicName);
+        } else {
+            clearTypeError(topicName);
+            loadQuestionsByTopic(topicName);
+        }
     };
 
     // 处理筛选变化
@@ -151,7 +177,7 @@ const QuestionCollection: React.FC = () => {
                     ← 返回主页
                 </button>
                 <h1 className="collection-title">
-                    {topicName.toUpperCase()} 面试问题集合
+                    {topicName.toUpperCase()} {isPrivateMode ? '私有' : ''}面试问题集合
                 </h1>
                 <div className="collection-stats">
                     <span className="question-count">{filteredQuestions.length} 个问题</span>
@@ -265,7 +291,10 @@ const QuestionCollection: React.FC = () => {
                                     </div>
                                 </header>
                                 
-                                <div className="question-content" onClick={() => navigate(`/questions/${question.topic}/${question._id}`)}>
+                                <div className="question-content" onClick={() => {
+                                    const basePath = isPrivateMode ? '/questions/private' : '/questions';
+                                    navigate(`${basePath}/${question.topic}/${question._id}`);
+                                }}>
                                     <h4 className="question-title">{question.question}</h4>
                                     
                                     {question.answer && (

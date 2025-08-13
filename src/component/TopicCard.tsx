@@ -30,6 +30,7 @@ const TypeCard: React.FC<TypeCardProps> = ({ type, topicId, onClick }) => {
     };
     // 为不同类型定义图标
     const getTypeIcon = (type: string): string => {
+        if (!type) return '📋';
         switch (type.toLowerCase()) {
             case 'react':
                 return '⚛️';
@@ -55,6 +56,7 @@ const TypeCard: React.FC<TypeCardProps> = ({ type, topicId, onClick }) => {
 
     // 为不同类型定义描述
     const getTypeDescription = (type: string): string => {
+        if (!type) return '技术面试题集合';
         switch (type.toLowerCase()) {
             case 'react':
                 return '用于构建用户界面的JavaScript库';
@@ -82,7 +84,7 @@ const TypeCard: React.FC<TypeCardProps> = ({ type, topicId, onClick }) => {
         <div className="type-card" onClick={onClick}>
             <div className="type-card-header">
                 <div className="type-icon">{getTypeIcon(type)}</div>
-                <h3 className="type-title">{type.toUpperCase()}</h3>
+                <h3 className="type-title">{type ? type.toUpperCase() : '未知类型'}</h3>
                 {topicId && (
                     <button
                         className={`like-topic-button ${isTopicLiked(topicId) ? 'liked' : ''}`}

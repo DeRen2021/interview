@@ -1,21 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { type QuestionType } from '../../type/question.type';
-import { baseUrl,updateQuestionFaqEndpoint, mainApi} from '../../config/config';
-import { useQuestion } from '../../context/QuestionContext';
-import { useLogin } from '../../context/LoginContext';
-import '../../styles/component/QuestionInterview.css';
-import AudioRecorder from './recordButton';
-import { type audioResponse } from '../../type/openai.type';
-import { handleApiError } from '../../config/apiInstance';
-import '../../styles/component/Button.css';
-import CheckAnswerButton from './checkAnswerButton';
+import { type QuestionType } from '../type/question.type';
+import { baseUrl,updateQuestionFaqEndpoint, mainApi} from '../config/config';
+import { useQuestion } from '../context/QuestionContext';
+import { useLogin } from '../context/LoginContext';
+import '../styles/component/QuestionInterview.css';
+import AudioRecorder from '../component/interview/recordButton';
+import { handleApiError } from '../config/apiInstance';
+import '../styles/component/Button.css';
+import CheckAnswerButton from '../component/interview/checkAnswerButton';
 
 
 const QuestionInterview: React.FC = () => {
     const { topic, _id } = useParams<{ topic: string, _id: string }>();
     const navigate = useNavigate();
-    const { getQuestionById, loadQuestionsByTopic: loadQuestionsByType, isTypeLoading, getQuestionsForTopic: getQuestionsForType } = useQuestion();
+    
+    // 检测是否为私有模式
+    const isPrivateMode = window.location.pathname.includes('/questions/private/');
+    
+    const { 
+        getQuestionById, 
+        loadQuestionsByTopic: loadQuestionsByType, 
+        isTypeLoading, 
+        getQuestionsForTopic: getQuestionsForType,
+        // 私有模式方法
+        getPrivateQuestionById,
+        loadPrivateQuestionsByTopic,
+        isPrivateTypeLoading,
+        getPrivateQuestionsForTopic
+    } = useQuestion();
     const { updateLikedQuestions, isQuestionLiked } = useLogin();
     const [transcript, setTranscript] = useState<string>('');
     const [passed, setPassed] = useState<boolean|null>(null);
@@ -30,9 +43,15 @@ const QuestionInterview: React.FC = () => {
     const [isUpdatingLike, setIsUpdatingLike] = useState(false);
 
     // 类型检查：确保 type 和 _id 都存在
-    const question = topic && _id ? getQuestionById(topic, _id) : null;
-    const loading = topic ? isTypeLoading(topic) : false;
-    const questionList = topic ? getQuestionsForType(topic) : [];
+    const question = topic && _id ? (
+        isPrivateMode ? getPrivateQuestionById(topic, _id) : getQuestionById(topic, _id)
+    ) : null;
+    const loading = topic ? (
+        isPrivateMode ? isPrivateTypeLoading(topic) : isTypeLoading(topic)
+    ) : false;
+    const questionList = topic ? (
+        isPrivateMode ? getPrivateQuestionsForTopic(topic) : getQuestionsForType(topic)
+    ) : [];
 
     useEffect(() => {
         // 如果参数不存在，重定向到首页
@@ -44,13 +63,16 @@ const QuestionInterview: React.FC = () => {
 
         // 如果问题数据还没有加载，则加载该类型的所有问题
         if (!question && !loading) {
-            loadQuestionsByType(topic);
-
+            if (isPrivateMode) {
+                loadPrivateQuestionsByTopic(topic);
+            } else {
+                loadQuestionsByType(topic);
+            }
         }
         setTranscript('');
         setPassed(null);
         setFeedback('');
-    }, [topic, _id, question, loading, navigate, loadQuestionsByType]);
+    }, [topic, _id, question, loading, navigate, loadQuestionsByType, loadPrivateQuestionsByTopic, isPrivateMode]);
 
     // 处理模式切换
     const handleModeToggle = () => {
@@ -95,7 +117,8 @@ const QuestionInterview: React.FC = () => {
     // 处理题目跳转
     const handleQuestionNavigation = (questionItem: QuestionType) => {
         if (questionItem._id && topic) {
-            navigate(`/questions/${topic}/${questionItem._id}`);
+            const basePath = isPrivateMode ? '/questions/private' : '/questions';
+            navigate(`${basePath}/${topic}/${questionItem._id}`);
         }
     };
 
