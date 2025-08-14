@@ -24,11 +24,11 @@ const parseFrqQuestionEndpoint = `${questionManagementBaseUrl}api/parse-frq-ques
 
 const uploadQuestionEndpoint = `${questionManagementBaseUrl}api/upload-question`;
 
-const generateAnswerEndpoint = `${questionManagementBaseUrl}api/generate-answer`;
+const generateAnswerEndpoint = `${questionManagementBaseUrl}/api/generate-answer`;
 
-const generateExplanationEndpoint = `${questionManagementBaseUrl}api/generate-explanation`;
+const generateExplanationEndpoint = `${questionManagementBaseUrl}/api/generate-explanation`;
 
-const updateQuestionEndpoint = `${questionManagementBaseUrl}api/update-question`;
+const updateQuestionEndpoint = `${questionManagementBaseUrl}/api/update-question`;
 
 // User Route
 const userEndoint = `${baseUrl}api/users`;
