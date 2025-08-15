@@ -485,6 +485,31 @@
     font-weight: 600;
 }
 
+.answer-text-container {
+    max-height: 120px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #3498db #f0f8ff;
+}
+
+.answer-text-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.answer-text-container::-webkit-scrollbar-track {
+    background: #f0f8ff;
+    border-radius: 3px;
+}
+
+.answer-text-container::-webkit-scrollbar-thumb {
+    background: #3498db;
+    border-radius: 3px;
+}
+
+.answer-text-container::-webkit-scrollbar-thumb:hover {
+    background: #2980b9;
+}
+
 .answer-text {
     color: #34495e;
     margin: 0;

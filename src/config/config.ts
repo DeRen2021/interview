@@ -7,22 +7,22 @@ import { mainApi, questionManagementApi } from './apiInstance';
 
 
 // Topic 端点
-const getAllQuestionTypesEndpoint = "api/topic/";
+const getPublicTopicsEndpoint = `${baseUrl}/api/topic/`;
 
-const getPrivateTopicEndpoint = "api/topic/private";
+const getPrivateTopicEndpoint = `${baseUrl}/api/topic/private`;
 
 
 //问题端点
-const getQuestionByTopicEndpoint = "api/questions/";
+const getQuestionByTopicEndpoint = `${baseUrl}/api/questions/`;
 
-const getPrivateQuestionByTopicEndpoint = "api/questions/private/";
+const getPrivateQuestionByTopicEndpoint = `${baseUrl}/api/questions/private/`;
 
 
 
 // 新增：问题管理端点
-const parseFrqQuestionEndpoint = `${questionManagementBaseUrl}api/parse-frq-question`;
+const parseFrqQuestionEndpoint = `${questionManagementBaseUrl}/api/parse-frq-question`;
 
-const uploadQuestionEndpoint = `${questionManagementBaseUrl}api/upload-question`;
+const uploadQuestionEndpoint = `${questionManagementBaseUrl}/api/upload-question`;
 
 const generateAnswerEndpoint = `${questionManagementBaseUrl}/api/generate-answer`;
 
@@ -31,7 +31,7 @@ const generateExplanationEndpoint = `${questionManagementBaseUrl}/api/generate-e
 const updateQuestionEndpoint = `${questionManagementBaseUrl}/api/update-question`;
 
 // User Route
-const userEndoint = `${baseUrl}api/users`;
+const userEndoint = `${baseUrl}/api/users`;
 
 const authUserEndpoint = `${userEndoint}/auth`;
 
@@ -44,16 +44,16 @@ const updateUserLikedTopicsEndpoint = `${userEndoint}/liked-topics`;
 const updateUserLikedQuestionsEndpoint = `${userEndoint}/liked-questions`;
 const getUserLikedQuestionsEndpoint = `${userEndoint}/liked-questions`;
 
-const updateQuestionFaqEndpoint = `${baseUrl}api/questions`;
+const updateQuestionFaqEndpoint = `${baseUrl}/api/questions`;
 
 // const updateQuestionAccuracyEndpoint = `${baseUrl}api/questions/:questionId/accuracy`;
 
 
 
 // OpenAI endpoint
-const transcribeEndpoint = `${baseUrl}api/openai/transcribe`;
+const transcribeEndpoint = `${baseUrl}/api/openai/transcribe`;
 
-const checkAnswerEndpoint = `${baseUrl}api/openai/comparison`;
+const checkAnswerEndpoint = `${baseUrl}/api/openai/comparison`;
 
 
 export { 
@@ -62,13 +62,15 @@ export {
     questionManagementApi,
     
     // 基础URL
-    baseUrl, 
-    questionManagementBaseUrl,
+    // baseUrl, 
+    // questionManagementBaseUrl,
     
-    // 端点配置
-    getQuestionByTopicEndpoint,
-    getAllQuestionTypesEndpoint,
+    // Topic 端点配置
+    getPublicTopicsEndpoint,
     getPrivateTopicEndpoint,
+
+    // 问题获取端点配置
+    getQuestionByTopicEndpoint,
     getPrivateQuestionByTopicEndpoint,
 
     // admin管理端点
@@ -87,6 +89,8 @@ export {
     updateQuestionFaqEndpoint,
     getUserLikedQuestionsEndpoint,
     getUserProfileEndpoint,
+
+    // AI 端点
     transcribeEndpoint,
     checkAnswerEndpoint
 };

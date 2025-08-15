@@ -1,14 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useQuestion } from '../context/QuestionContext';
 import '../styles/component/DebugPanel.css';
 
 const DebugPanel: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const { questionsCache, questionsLoading, questionsError } = useQuestion();
+    const { questionsCache, questionsLoading, questionsError,clearCache } = useQuestion();
+
+
+
+    useEffect(() =>{
+        // console.log('questionsCache', questionsCache);
+    },[questionsCache]);
 
     const togglePanel = () => {
         setIsOpen(!isOpen);
     };
+
 
     if (!isOpen) {
         return (
@@ -35,10 +42,11 @@ const DebugPanel: React.FC = () => {
                     ) : (
                         <div className="debug-cache-list">
                             {Object.entries(questionsCache).map(([type, questions]) => (
-                                <div key={type} className="debug-cache-item">
+                                <div key={`${type}-${questions.length}`} className="debug-cache-item">
                                     <span className="debug-type">{type.toUpperCase()}</span>
                                     <span className="debug-count">{questions.length} 个问题</span>
                                     <span className="debug-status cached">已缓存</span>
+                                    <button className="debug-clear-cache" onClick={() => clearCache(type)}>清除缓存</button>
                                 </div>
                             ))}
                         </div>

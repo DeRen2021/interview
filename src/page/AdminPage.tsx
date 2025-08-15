@@ -15,7 +15,7 @@ interface EditingQuestion extends QuestionType {
 
 const AdminPanel: React.FC = () => {
   const {
-    questionTypes: topics,
+    publicTopics: topics,
     loadQuestionTopics,
     loadQuestionsByTopic,
     loadAllTopicsQuestions,

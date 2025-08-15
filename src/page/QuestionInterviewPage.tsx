@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { type QuestionType } from '../type/question.type';
-import { baseUrl,updateQuestionFaqEndpoint, mainApi} from '../config/config';
+import { updateQuestionFaqEndpoint, mainApi} from '../config/config';
 import { useQuestion } from '../context/QuestionContext';
 import { useLogin } from '../context/LoginContext';
 import '../styles/component/QuestionInterview.css';
@@ -107,11 +107,8 @@ const QuestionInterview: React.FC = () => {
     // 构建录音URL
     const getRecordingUrl = (recordingPath: string) => {
         if (!recordingPath) return '';
-        // 如果是完整URL则直接使用，否则拼接baseUrl
-        if (recordingPath.startsWith('http')) {
-            return recordingPath;
-        }
-        return `${baseUrl}/${recordingPath}`;
+        // 所有录音文件都应该是完整的S3 URL
+        return recordingPath;
     };
 
     // 处理题目跳转

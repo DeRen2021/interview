@@ -8,7 +8,7 @@ type ViewMode = 'public' | 'private';
 
 const HomePage: React.FC = () => {
     const { 
-        questionTypes, 
+        publicTopics: questionTypes, 
         topicsLoading: typesLoading, 
         typesError,
         privateTopics,
@@ -27,7 +27,7 @@ const HomePage: React.FC = () => {
         }
     }, [viewMode, loadPrivateTopics]);
 
-    const handleTypeClick = (type: string) => {
+    const handleTopicCardClick = (type: string) => {
         // 根据当前视图模式导航到相应的路由
         if (viewMode === 'private') {
             navigate(`/questions/private/${type}`);
@@ -113,7 +113,7 @@ const HomePage: React.FC = () => {
                                 key={`${viewMode}-${questionType._id || questionType.topic || index}`}
                                 type={questionType.topic}
                                 topicId={questionType._id || questionType.topic}
-                                onClick={() => handleTypeClick(questionType.topic)}
+                                onClick={() => handleTopicCardClick(questionType.topic)}
                             />
                         ))
                     ) : (

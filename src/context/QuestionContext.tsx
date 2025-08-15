@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { type QuestionType } from '../type/question.type';
 import { type TopicType } from '../type/topic.type';
-import { 
-    baseUrl, 
-    getAllQuestionTypesEndpoint, 
-    getQuestionByTopicEndpoint,
+
+import {  
+    getPublicTopicsEndpoint, 
     getPrivateTopicEndpoint,
+    getQuestionByTopicEndpoint,
     getPrivateQuestionByTopicEndpoint
 } from '../config/config';
 import { mainApi } from '../config/apiInstance';
@@ -23,7 +23,7 @@ interface TopicApiResponse {
 
 interface QuestionContextType {
     // 公共问题类型相关
-    questionTypes: TopicType[];
+    publicTopics: TopicType[];
     topicsLoading: boolean;
     typesError: string | null;
     
@@ -65,6 +65,9 @@ interface QuestionContextType {
     getPrivateTypeError: (type: string) => string | null;
     clearPrivateTypeError: (type: string) => void;
     refreshPrivateTopics: () => Promise<void>;
+
+    //清除cache
+    clearCache: (topic: string) => void;
 }
 
 const QuestionContext = createContext<QuestionContextType | undefined>(undefined);
@@ -99,15 +102,15 @@ export const QuestionProvider: React.FC<QuestionProviderProps> = ({ children }) 
 
     // 初始化加载问题类型
     useEffect(() => {
-        loadQuestionTopics();
+        loadPublicTopics();
     }, []);
 
-    const loadQuestionTopics = async (): Promise<void> => {
+    const loadPublicTopics = async (): Promise<void> => {
         setTopicsLoading(true);
         setTopicsError(null);
         
         try {
-            const response = await mainApi.get<TopicApiResponse>(`${baseUrl}${getAllQuestionTypesEndpoint}`);
+            const response = await mainApi.get<TopicApiResponse>(getPublicTopicsEndpoint);
             // console.log('Question types fetched successfully:', response.data,response.data.data.length);
             if (response.data && response.data.data.length > 0) {
                 setQuestionTopics(response.data.data);
@@ -117,8 +120,7 @@ export const QuestionProvider: React.FC<QuestionProviderProps> = ({ children }) 
                 setTopicsError('No question types found');
             }
         } catch (error) {
-            console.error('Error fetching question types:', error);
-            // 如果API调用失败，使用默认类型
+            console.error('Error fetching Topics:', error);
             setQuestionTopics([]);
             setTopicsError('无法连接到服务器');
         } finally {
@@ -126,12 +128,12 @@ export const QuestionProvider: React.FC<QuestionProviderProps> = ({ children }) 
         }
     };
 
-    const refreshQuestionTypes = async (): Promise<void> => {
-        await loadQuestionTopics();
+    const refreshPublicTopics = async (): Promise<void> => {
+        await loadPublicTopics();
     };
 
-    // 私有话题懒加载方法
-    const loadPrivateTopics = async (): Promise<void> => {
+    // 私有话题懒加载方法 - 使用useCallback避免无限循环
+    const loadPrivateTopics = useCallback(async (): Promise<void> => {
         // 如果已经加载过，直接返回
         if (privateTopicsLoaded) {
             return;
@@ -155,10 +157,10 @@ export const QuestionProvider: React.FC<QuestionProviderProps> = ({ children }) 
         setPrivateTopicsError(null);
         
         try {
-            const response = await mainApi.get<TopicApiResponse>(`${baseUrl}${getPrivateTopicEndpoint}`);
-            console.log('Private topics API response:', response.data);
+            const response = await mainApi.get<TopicApiResponse>(getPrivateTopicEndpoint);
+            // console.log('Private topics API response:', response.data);
             if (response.data && response.data.data && response.data.data.length > 0) {
-                console.log('Private topics data:', response.data.data);
+                // console.log('Private topics data:', response.data.data);
                 setPrivateTopics(response.data.data);
                 setPrivateTopicsLoaded(true);
             } else {
@@ -173,14 +175,14 @@ export const QuestionProvider: React.FC<QuestionProviderProps> = ({ children }) 
         } finally {
             setPrivateTopicsLoading(false);
         }
-    };
+    }, [privateTopicsLoaded, privateTopicsLoading]);
 
-    const refreshPrivateTopics = async (): Promise<void> => {
+    const refreshPrivateTopics = useCallback(async (): Promise<void> => {
         setPrivateTopicsLoaded(false); // 重置加载标记以强制重新加载
         await loadPrivateTopics();
-    };
+    }, [loadPrivateTopics]);
 
-    const loadQuestionsByTopic = async (topic: string): Promise<void> => {
+    const loadQuestionsByTopic = useCallback(async (topic: string): Promise<void> => {
         // 如果已经有缓存数据，直接返回
         if (questionsCache[topic]) {
             return;
@@ -206,7 +208,7 @@ export const QuestionProvider: React.FC<QuestionProviderProps> = ({ children }) 
         setQuestionsError(prev => ({ ...prev, [topic]: null }));
 
         try {
-            const response = await mainApi.get<ApiResponse>(`${baseUrl}${getQuestionByTopicEndpoint}${topic}`);
+            const response = await mainApi.get<ApiResponse>(`${getQuestionByTopicEndpoint}${topic}`);
             console.log('Questions fetched successfully:', response.data,response.data.data.length);
             if (response.data.success) {
                 // 将数据存入缓存
@@ -229,9 +231,9 @@ export const QuestionProvider: React.FC<QuestionProviderProps> = ({ children }) 
         } finally {
             setQuestionsLoading(prev => ({ ...prev, [topic]: false }));
         }
-    };
+    }, [questionsCache, questionsLoading]);
 
-    // 加载所有话题的问题
+    // 加载所有公共话题的问题 future: 同时cache这些数据？
     const loadAllTopicsQuestions = async (): Promise<void> => {
         // 并行加载所有话题的问题
         const loadPromises = questionTopics.map(topic => loadQuestionsByTopic(topic.topic));
@@ -239,7 +241,7 @@ export const QuestionProvider: React.FC<QuestionProviderProps> = ({ children }) 
     };
 
     // 私有问题懒加载方法
-    const loadPrivateQuestionsByTopic = async (topic: string): Promise<void> => {
+    const loadPrivateQuestionsByTopic = useCallback(async (topic: string): Promise<void> => {
         // 如果已经有缓存数据，直接返回
         if (privateQuestionsCache[topic]) {
             return;
@@ -264,8 +266,8 @@ export const QuestionProvider: React.FC<QuestionProviderProps> = ({ children }) 
         setPrivateQuestionsError(prev => ({ ...prev, [topic]: null }));
 
         try {
-            const response = await mainApi.get<ApiResponse>(`${baseUrl}${getPrivateQuestionByTopicEndpoint}${topic}`);
-            console.log('Private questions fetched successfully:', response.data, response.data.data.length);
+            const response = await mainApi.get<ApiResponse>(`${getPrivateQuestionByTopicEndpoint}${topic}`);
+            // console.log('Private questions fetched successfully:', response.data, response.data.data.length);
             if (response.data.success) {
                 // 将数据存入缓存
                 setPrivateQuestionsCache(prev => ({
@@ -287,16 +289,16 @@ export const QuestionProvider: React.FC<QuestionProviderProps> = ({ children }) 
         } finally {
             setPrivateQuestionsLoading(prev => ({ ...prev, [topic]: false }));
         }
-    };
+    }, [privateQuestionsCache, privateQuestionsLoading]);
 
     // 加载所有私有话题的问题
-    const loadAllPrivateTopicsQuestions = async (): Promise<void> => {
+    const loadAllPrivateTopicsQuestions = useCallback(async (): Promise<void> => {
         // 先确保私有话题已加载
         await loadPrivateTopics();
         // 并行加载所有私有话题的问题
         const loadPromises = privateTopics.map(topic => loadPrivateQuestionsByTopic(topic.topic));
         await Promise.all(loadPromises);
-    };
+    }, [loadPrivateTopics, privateTopics, loadPrivateQuestionsByTopic]);
 
     const getQuestionsForTopic = (type: string): QuestionType[] => {
         return questionsCache[type] || [];
@@ -369,9 +371,28 @@ export const QuestionProvider: React.FC<QuestionProviderProps> = ({ children }) 
         setPrivateQuestionsError(prev => ({ ...prev, [type]: null }));
     };
 
+    const clearCache = (topic: string): void => {
+        setQuestionsCache(prev => {
+            const newCache = { ...prev };
+            delete newCache[topic];
+            return newCache;
+        });
+        // 同时清除对应的加载状态和错误状态
+        setQuestionsLoading(prev => {
+            const newLoading = { ...prev };
+            delete newLoading[topic];
+            return newLoading;
+        });
+        setQuestionsError(prev => {
+            const newError = { ...prev };
+            delete newError[topic];
+            return newError;
+        });
+    };
+
     const contextValue: QuestionContextType = {
         // 公共问题类型相关
-        questionTypes: questionTopics,
+        publicTopics: questionTopics,
         topicsLoading,
         typesError: topicsError,
         
@@ -391,7 +412,7 @@ export const QuestionProvider: React.FC<QuestionProviderProps> = ({ children }) 
         privateQuestionsError,
         
         // 公共方法
-        loadQuestionTopics,
+        loadQuestionTopics: loadPublicTopics,
         loadQuestionsByTopic,
         loadAllTopicsQuestions,
         getQuestionsForTopic,
@@ -400,7 +421,7 @@ export const QuestionProvider: React.FC<QuestionProviderProps> = ({ children }) 
         isTypeLoading,
         getTypeError,
         clearTypeError,
-        refreshQuestionTypes,
+        refreshQuestionTypes: refreshPublicTopics,
         
         // 私有方法（懒加载）
         loadPrivateTopics,
@@ -412,7 +433,10 @@ export const QuestionProvider: React.FC<QuestionProviderProps> = ({ children }) 
         isPrivateTypeLoading,
         getPrivateTypeError,
         clearPrivateTypeError,
-        refreshPrivateTopics
+        refreshPrivateTopics,
+
+        //清除cache
+        clearCache,
     };
 
     return (

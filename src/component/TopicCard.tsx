@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { useLogin } from '../context/LoginContext';
 import '../styles/component/TopicCard.css';
 
-interface TypeCardProps {
+interface TopicCardProps {
     type: string;
     topicId?: string; // 添加topicId用于like功能
     onClick: () => void;
 }
 
-const TypeCard: React.FC<TypeCardProps> = ({ type, topicId, onClick }) => {
+const TypeCard: React.FC<TopicCardProps> = ({ type, topicId, onClick }) => {
     const { updateLikedTopics, isTopicLiked } = useLogin();
     const [isLiking, setIsLiking] = useState(false);
 
