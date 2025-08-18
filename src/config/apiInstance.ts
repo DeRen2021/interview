@@ -23,7 +23,7 @@ class TokenManager {
 }
 
 // 创建API实例的通用配置
-const createApiInstance = (baseURL: string,timeout: number = 10000): AxiosInstance => {
+const createApiInstance = (baseURL: string,timeout: number = 20000): AxiosInstance => {
     const instance = axios.create({
         baseURL,
         timeout:timeout, // 10秒超时
